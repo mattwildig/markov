@@ -1,2 +1,2 @@
 require 'markov/markov'
-require 'Markov'
+require 'markov_native'

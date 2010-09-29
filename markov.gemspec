@@ -1,6 +1,6 @@
 
 Gem::Specification.new do |s|
-  s.name = "Markov"
+  s.name = "markov"
   s.version = '0.0.1'
   s.summary = "Simple Markov Chain generator"
   s.require_paths << 'ext'
