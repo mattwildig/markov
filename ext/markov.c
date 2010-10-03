@@ -16,38 +16,38 @@ typedef struct StateNode StateNode;
 typedef struct MarkovData MarkovData;
 
 struct MarkovData {
-	int prefix_len;
-	const char* sentinel_word;
+    int prefix_len;
+    const char* sentinel_word;
     int output_words;
-	
-	int statetab_len;
-	StateNode** statetab;
-	
+    
+    int statetab_len;
+    StateNode** statetab;
+    
     char initialized;
 
 };
 
 struct SuffixNode {
-	const char* suffix;
-	SuffixNode* next;
+    const char* suffix;
+    SuffixNode* next;
 };
 
 struct StateNode {
-	const char** prefix;
-	SuffixNode* list;
-	StateNode* next;
+    const char** prefix;
+    SuffixNode* list;
+    StateNode* next;
 };
 
 static int hash_prefix(MarkovData* d, const char** prefix) {
-	unsigned int h = 0;
-	
-	for (int i = 0; i < d->prefix_len; i++) {
-		for (const char* c = prefix[i]; *c != '\0'; c++) {
-			h = 31 * h + *c;
-		}
-	}
-	
-	return h % d->statetab_len;
+    unsigned int h = 0;
+    
+    for (int i = 0; i < d->prefix_len; i++) {
+        for (const char* c = prefix[i]; *c != '\0'; c++) {
+            h = 31 * h + *c;
+        }
+    }
+    
+    return h % d->statetab_len;
 }
 
 static bool prefix_match(const char** prefix1, const char** prefix2, int num_words) {
@@ -107,18 +107,18 @@ static void prepopulate_prefix(MarkovData* data, const char** prefix) {
 
 static void set_defaults(MarkovData* data) {
     if (data->statetab_len == 0) data->statetab_len = DEFAULT_STATE_TABLE_SIZE;
-	data->statetab = malloc(sizeof(StateNode*) * DEFAULT_STATE_TABLE_SIZE);
-	
-	for (int i = 0; i < data->statetab_len; i++) {
+    data->statetab = malloc(sizeof(StateNode*) * DEFAULT_STATE_TABLE_SIZE);
+    
+    for (int i = 0; i < data->statetab_len; i++) {
         data->statetab[i] = NULL;
     }
-	
-	if (data->prefix_len == 0) data->prefix_len = DEFAULT_PREFIX_LENGTH;
-	
-	if (data->sentinel_word == NULL) data->sentinel_word = strdup(DEFAULT_SENTINEL_WORD);
-	
+    
+    if (data->prefix_len == 0) data->prefix_len = DEFAULT_PREFIX_LENGTH;
+    
+    if (data->sentinel_word == NULL) data->sentinel_word = strdup(DEFAULT_SENTINEL_WORD);
+    
     if (data->output_words == 0) data->output_words = DEFAULT_OUTPUT_WORDS;
-	
+    
     data->initialized = 1;
 }
 
@@ -133,20 +133,20 @@ void markov_add_input_from_stream(MarkovData* data, FILE* input) {
 
     check_data_initialised(data);
     
-	const int buf_size = 100;  //TODO: handle possibility of words > 100 chars in length
-	char buf[buf_size];
+    const int buf_size = 100;  //TODO: handle possibility of words > 100 chars in length
+    char buf[buf_size];
 
-	char fmt[10];
-	sprintf(fmt, "%%%ds", buf_size -1);
-	
+    char fmt[10];
+    sprintf(fmt, "%%%ds", buf_size -1);
+    
     const char* prefix[data->prefix_len];
     prepopulate_prefix(data, prefix);
-	
-	while (fscanf(input, fmt, buf) != EOF) {
+    
+    while (fscanf(input, fmt, buf) != EOF) {
         char* const word = strdup(buf); //TODO: check for errors on strdup
         add_suffix(data, prefix, word);
         rotate_prefix(data, prefix, word);
-	}
+    }
     add_suffix(data, prefix, strdup(data->sentinel_word));
 }
 
@@ -154,37 +154,37 @@ void markov_add_input_from_string(MarkovData* data, char* string) {
     check_data_initialised(data);
     
     const int buf_size = 100;  //TODO: handle possibility of words > 100 chars in length
-	char buf[buf_size];
+    char buf[buf_size];
 
-	char fmt[10];
-	sprintf(fmt, "%%%ds", buf_size -1);
-	
+    char fmt[10];
+    sprintf(fmt, "%%%ds", buf_size -1);
+    
     const char* prefix[data->prefix_len];
     prepopulate_prefix(data, prefix);
-	
-	while (sscanf(string, fmt, buf) != EOF) {
+    
+    while (sscanf(string, fmt, buf) != EOF) {
         char* const word = strdup(buf); //TODO: check for errors on strdup
         add_suffix(data, prefix, word);
         rotate_prefix(data, prefix, word);
         string += strlen(word) +1;
-	}
-	
+    }
+    
     add_suffix(data, prefix, strdup(data->sentinel_word));
 }
 
 MarkovData* markov_init() {
-	MarkovData* d = malloc(sizeof(MarkovData));	
+    MarkovData* d = malloc(sizeof(MarkovData)); 
     d->statetab_len = 0;
     d->output_words = 0;
-	
-	d->prefix_len = 0;
+    
+    d->prefix_len = 0;
     d->sentinel_word = NULL;
-	
-	//TODO: error checking on mallocs
-	
+    
+    //TODO: error checking on mallocs
+    
     d->initialized = 0;
-	
-	return d;
+    
+    return d;
 }
 
 void markov_set_table_size(MarkovData* data, int size) {
