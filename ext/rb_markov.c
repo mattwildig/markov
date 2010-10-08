@@ -14,6 +14,7 @@ static VALUE mk_alloc(VALUE klass) {
     return obj;
 }
 
+/* :nodoc: */
 static VALUE mk_initialize(int argc, VALUE* argv, VALUE self) { 
     
     MarkovData* data;
@@ -49,6 +50,7 @@ static VALUE mk_initialize(int argc, VALUE* argv, VALUE self) {
     return self;
 }
 
+/* :nodoc: */
 static VALUE mk_add_input(VALUE self, VALUE in) {
     MarkovData* data;
     Data_Get_Struct(self, MarkovData, data);
@@ -66,6 +68,7 @@ static VALUE mk_add_input(VALUE self, VALUE in) {
     return self;
 }
 
+/* :nodoc: */
 static VALUE mk_generate_to_stream(VALUE self, VALUE out) {
     MarkovData* data;
     Data_Get_Struct(self, MarkovData, data);
@@ -83,6 +86,7 @@ static VALUE mk_generate_to_stream(VALUE self, VALUE out) {
     return Qnil;
 }
 
+/* :nodoc: */
 static VALUE mk_generate_string(VALUE self) {
     MarkovData* data;
     Data_Get_Struct(self, MarkovData, data);
@@ -95,6 +99,7 @@ static VALUE mk_generate_string(VALUE self) {
     return rb_str;
 }
 
+/* :nodoc: */
 void Init_markov_native() {
     VALUE mk_module = rb_define_module("Markov");
     
