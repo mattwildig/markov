@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+/* strdup() (from string.h) is not defined when using -std=c99, so use
+__USE_BSD to avoid the warning. */
 #define __USE_BSD
 #include <string.h>
 #include <time.h>
