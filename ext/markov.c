@@ -218,7 +218,7 @@ int markov_generate_to_stream(MarkovData* data, FILE* dest, int max_words) {
     const char* prefix[data->prefix_len];
     prepopulate_prefix(data, prefix);
     
-    srand(time(NULL));
+    srand( (unsigned int) time(NULL));
     
     while(max_words-- > 0) {
         StateNode* state = lookup_state(data, prefix); //possibly should check for null, but should always exist
@@ -256,7 +256,7 @@ char* markov_generate_to_string(MarkovData* data, int max_words) {
     int used = 0;
     char* dest_buffer = malloc(sizeof(char[initial_size]));
     
-    srand(time(NULL));
+    srand( (unsigned int) time(NULL));
     
     while(max_words-- > 0) {
         StateNode* state = lookup_state(data, prefix); //possibly should check for null, but should always exist
@@ -273,7 +273,7 @@ char* markov_generate_to_string(MarkovData* data, int max_words) {
             break;
         }
         
-        int word_len = strlen(word);
+        int word_len = (int)strlen(word);
         if (word_len + 1 > (size - used)) {
             char* new_buffer = realloc(dest_buffer, sizeof(char[size * 2]));
             if (new_buffer == NULL) {
