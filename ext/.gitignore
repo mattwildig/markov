@@ -1,4 +1,4 @@
 Makefile
-Markov.bundle
+markov_native.bundle
 *.o
 *.so
