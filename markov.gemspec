@@ -8,5 +8,4 @@ Gem::Specification.new do |s|
   s.summary = "A Simple Markov Chain generator"
   s.files = Dir.glob("{lib,ext}/**/*.{c,h,rb}")
   s.extensions << 'ext/extconf.rb'
-  s.required_ruby_version = '~> 1.8.7'
 end
