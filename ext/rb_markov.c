@@ -1,6 +1,13 @@
 #include "markov.h"
 #include "ruby.h"
-#include "rubyio.h"
+
+#ifdef HAVE_RUBY_IO_H 
+#include "ruby/io.h" //ruby 1.9
+#define GetReadFile(x) rb_io_stdio_file(x)
+#define GetWriteFile(x) rb_io_stdio_file(x)
+#else
+#include "rubyio.h" //ruby1.8
+#endif
 
 static void mk_free(void* data) {
     markov_free(data);
@@ -32,7 +39,7 @@ static VALUE mk_initialize(int argc, VALUE* argv, VALUE self) {
     }
     
     VALUE* array_data = RARRAY_PTR(argv[0]);
-    int array_len = RARRAY_LEN(argv[0]);
+    int array_len = (int)RARRAY_LEN(argv[0]);
     
     for (int i = 0; i<array_len; i++) {
         VALUE in = array_data[i];
