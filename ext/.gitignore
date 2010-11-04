@@ -1,4 +1,5 @@
 Makefile
-markov_native.bundle
+*.bundle
 *.o
 *.so
+mkmf.log
