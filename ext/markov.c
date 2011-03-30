@@ -309,6 +309,7 @@ void markov_free(MarkovData* data) {
             }
             
             StateNode* next = node->next;
+            free(node->prefix);
             free(node);
             node = next;
         }
