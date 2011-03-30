@@ -79,7 +79,6 @@ static void add_suffix(MarkovData* data, const char** prefix, const char* word) 
         state_node = malloc(sizeof(StateNode));
         
         state_node->prefix = malloc(sizeof(char*) * data->prefix_len);
-        if (state_node->prefix == NULL) printf("%s\n", "NULL prefix!");
         for(int i = 0; i < data->prefix_len; i++)
         {
             state_node->prefix[i] = prefix[i];
