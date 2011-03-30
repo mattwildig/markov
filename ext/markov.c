@@ -242,7 +242,7 @@ static int generate_internal(MarkovData* data, int max_words, int (*output_func)
     return 0;
 }
 
-static int output_to_file(const char* word, void* data) {
+static int write_word_to_stream(const char* word, void* data) {
     FILE* dest = (FILE*) data;
     fprintf(dest, "%s ", word);
     
@@ -255,7 +255,7 @@ typedef struct TextBuffer {
     char* text;
 } TextBuffer;
 
-static int output_to_string(const char* word, void* data){
+static int write_word_to_string(const char* word, void* data){
     TextBuffer* buffer = (TextBuffer*) data;
     
     int word_len = (int)strlen(word);
@@ -276,7 +276,7 @@ static int output_to_string(const char* word, void* data){
 
 int markov_generate_to_stream(MarkovData* data, FILE* dest, int max_words) {
 
-    return generate_internal(data, max_words, output_to_file, dest);
+    return generate_internal(data, max_words, write_word_to_stream, dest);
 }
 
 char* markov_generate_to_string(MarkovData* data, int max_words) {
@@ -289,7 +289,7 @@ char* markov_generate_to_string(MarkovData* data, int max_words) {
     buffer->used = 0;
     buffer->text = malloc(sizeof(char[initial_size]));
     
-    int err = generate_internal(data, max_words, output_to_string, buffer);
+    int err = generate_internal(data, max_words, write_word_to_string, buffer);
     
     if (err) {
         free(buffer->text);
