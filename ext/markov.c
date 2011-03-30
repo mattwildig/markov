@@ -210,52 +210,13 @@ void markov_set_output_words(MarkovData* data, int words) {
     data->output_words = words;
 }
 
-int markov_generate_to_stream(MarkovData* data, FILE* dest, int max_words) {
-    
-    if (max_words == 0) max_words = DEFAULT_OUTPUT_WORDS;
+static int generate_internal(MarkovData* data, int max_words, int (*output_func)(const char*, void*), void* output_data) {
     
     if (! data->initialized) return 1;
-    
-    const char* prefix[data->prefix_len];
-    prepopulate_prefix(data, prefix);
-    
-    srand( (unsigned int) time(NULL));
-    
-    while(max_words-- > 0) {
-        StateNode* state = lookup_state(data, prefix); //possibly should check for null, but should always exist
-        
-        const char* word = NULL;
-        int count = 0;
-        for(SuffixNode* s = state->list; s != NULL; s = s->next) {
-            if (rand() % ++count == 0) {
-                word = s->suffix;
-            }
-        }
-        
-        if (strcmp(word, data->sentinel_word) == 0) {
-            return 0;
-        }
-        
-        fprintf(dest, "%s ", word);
-        
-        rotate_prefix(data, prefix, word);
-    }
-    return 0;
-}
-
-char* markov_generate_to_string(MarkovData* data, int max_words) {
-        
-    if (! data->initialized) return NULL;
-    
     if (max_words == 0) max_words = data->output_words;
     
     const char* prefix[data->prefix_len];
     prepopulate_prefix(data, prefix);
-    
-    const int initial_size = 1024;
-    int size = initial_size;
-    int used = 0;
-    char* dest_buffer = malloc(sizeof(char[initial_size]));
     
     srand( (unsigned int) time(NULL));
     
@@ -274,26 +235,76 @@ char* markov_generate_to_string(MarkovData* data, int max_words) {
             break;
         }
         
-        int word_len = (int)strlen(word);
-        if (word_len + 1 > (size - used)) {
-            char* new_buffer = realloc(dest_buffer, sizeof(char[size * 2]));
-            if (new_buffer == NULL) {
-                free(dest_buffer);
-                return NULL;
-            }
-            dest_buffer = new_buffer;
-            size *= 2;
-        }
-        
-        strcpy(dest_buffer + used, word);
-        used += word_len;
-        dest_buffer[used++] = ' '; //replaces \0 with space
-        
+        if (output_func(word, output_data)) return 1;
+                
         rotate_prefix(data, prefix, word);
     }
-    dest_buffer[used - 1] = '\0';
-    dest_buffer = realloc(dest_buffer, sizeof(char[used]));
-    return dest_buffer;
+    
+    return 0;
+}
+
+static int output_to_file(const char* word, void* data) {
+    FILE* dest = (FILE*) data;
+    fprintf(dest, "%s ", word);
+    
+    return 0;
+}
+
+typedef struct TextBuffer TextBuffer;
+
+struct TextBuffer {
+    int size;
+    int used;
+    char* text;
+};
+
+static int output_to_string(const char* word, void* data){
+    TextBuffer* buffer = (TextBuffer*) data;
+    
+    int word_len = (int)strlen(word);
+    if (word_len + 1 > (buffer->size - buffer->used)) {
+        char* new_buffer = realloc(buffer->text, sizeof(char[buffer->size * 2]));
+        if (new_buffer == NULL) {
+            return 1;
+        }
+        buffer->text = new_buffer;
+        buffer->size *= 2;
+    }
+    
+    strcpy(buffer->text + buffer->used, word);
+    buffer->used += word_len;
+    buffer->text[buffer->used++] = ' '; //replaces \0 with space
+    return 0;
+}
+
+int markov_generate_to_stream(MarkovData* data, FILE* dest, int max_words) {
+
+    return generate_internal(data, max_words, output_to_file, dest);
+}
+
+char* markov_generate_to_string(MarkovData* data, int max_words) {
+    
+    const int initial_size = 1024;
+    
+    TextBuffer* buffer = malloc(sizeof(TextBuffer));
+    
+    buffer->size = initial_size;
+    buffer->used = 0;
+    buffer->text = malloc(sizeof(char[initial_size]));
+    
+    int err = generate_internal(data, max_words, output_to_string, buffer);
+    
+    if (err) {
+        free(buffer->text);
+        free(buffer);
+        return NULL;
+    }
+    
+    buffer->text[buffer->used - 1] = '\0';
+    buffer->text = realloc(buffer->text, sizeof(char[buffer->used]));
+    char* output = buffer->text;
+    free(buffer);
+    return output;
 }
 
 void markov_free(MarkovData* data) {
@@ -302,7 +313,6 @@ void markov_free(MarkovData* data) {
             
             SuffixNode* suf = node->list;
             while(suf != NULL) {
-                
                 free((char *)suf->suffix);
                 SuffixNode* next = suf->next;
                 free(suf);
