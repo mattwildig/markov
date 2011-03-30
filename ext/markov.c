@@ -177,6 +177,7 @@ void markov_add_input_from_string(MarkovData* data, char* string) {
 MarkovData* markov_init() {
     MarkovData* d = malloc(sizeof(MarkovData)); 
     d->statetab_len = 0;
+    d->statetab = NULL;
     d->output_words = 0;
     
     d->prefix_len = 0;
