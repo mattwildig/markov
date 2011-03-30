@@ -249,13 +249,11 @@ static int output_to_file(const char* word, void* data) {
     return 0;
 }
 
-typedef struct TextBuffer TextBuffer;
-
-struct TextBuffer {
+typedef struct TextBuffer {
     int size;
     int used;
     char* text;
-};
+} TextBuffer;
 
 static int output_to_string(const char* word, void* data){
     TextBuffer* buffer = (TextBuffer*) data;
