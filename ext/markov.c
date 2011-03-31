@@ -255,10 +255,7 @@ typedef struct TextBuffer {
     char* text;
 } TextBuffer;
 
-static int write_word_to_string(const char* word, void* data){
-    TextBuffer* buffer = (TextBuffer*) data;
-    
-    int word_len = (int)strlen(word);
+static int ensure_buffer_size(TextBuffer* buffer, int word_len){
     if (word_len + 1 > (buffer->size - buffer->used)) {
         char* new_buffer = realloc(buffer->text, sizeof(char[buffer->size * 2]));
         if (new_buffer == NULL) {
@@ -267,6 +264,14 @@ static int write_word_to_string(const char* word, void* data){
         buffer->text = new_buffer;
         buffer->size *= 2;
     }
+    return 0;
+}
+
+static int write_word_to_string(const char* word, void* data){
+    TextBuffer* buffer = (TextBuffer*) data;
+    
+    int word_len = (int)strlen(word);
+    if (ensure_buffer_size(buffer, word_len)) return 1;
     
     strcpy(buffer->text + buffer->used, word);
     buffer->used += word_len;
