@@ -279,15 +279,21 @@ int markov_generate_to_stream(MarkovData* data, FILE* dest, int max_words) {
     return generate_internal(data, max_words, write_word_to_stream, dest);
 }
 
-char* markov_generate_to_string(MarkovData* data, int max_words) {
-    
-    const int initial_size = 1024;
-    
+static TextBuffer* init_textbuffer(int initial_size) {
     TextBuffer* buffer = malloc(sizeof(TextBuffer));
     
     buffer->size = initial_size;
     buffer->used = 0;
     buffer->text = malloc(sizeof(char[initial_size]));
+    
+    return buffer;
+}
+
+char* markov_generate_to_string(MarkovData* data, int max_words) {
+    
+    const int initial_size = 1024;
+    
+    TextBuffer* buffer = init_textbuffer(initial_size);
     
     int err = generate_internal(data, max_words, write_word_to_string, buffer);
     
