@@ -1,9 +1,8 @@
+#define _POSIX_C_SOURCE 200112L
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-/* strdup() (from string.h) is not defined when using -std=c99, so use
-__USE_BSD to avoid the warning. */
-#define __USE_BSD
 #include <string.h>
 #include <time.h>
 #include <stdbool.h>
@@ -130,20 +129,19 @@ void check_data_initialised(MarkovData* data) {
     }
 }
 
-void markov_add_input_from_stream(MarkovData* data, FILE* input) {
-
+static void add_input(MarkovData* data, int (*get_word)(char* /*target buffer*/, char* /*format*/, void* /*data*/), void* input_data){
     check_data_initialised(data);
     
     const int buf_size = 100;  //TODO: handle possibility of words > 100 chars in length
     char buf[buf_size];
-
+    
     char fmt[10];
     sprintf(fmt, "%%%ds", buf_size -1);
     
     const char* prefix[data->prefix_len];
     prepopulate_prefix(data, prefix);
     
-    while (fscanf(input, fmt, buf) != EOF) {
+    while (get_word(buf, fmt, input_data) != EOF) {
         char* const word = strdup(buf); //TODO: check for errors on strdup
         add_suffix(data, prefix, word);
         rotate_prefix(data, prefix, word);
@@ -151,7 +149,21 @@ void markov_add_input_from_stream(MarkovData* data, FILE* input) {
     add_suffix(data, prefix, strdup(data->sentinel_word));
 }
 
+static int get_word_from_stream(char* buffer, char* fmt, void* data){
+    FILE* input = (FILE*)data;
+    return fscanf(input, fmt, buffer);
+}
+
+// static int get_word_from_string(char* buffer, char* fmt, void* data){
+//     
+// }
+
+void markov_add_input_from_stream(MarkovData* data, FILE* input) {
+    add_input(data, get_word_from_stream, input);
+}
+
 void markov_add_input_from_string(MarkovData* data, char* string) {
+    printf("Adding from string");
     check_data_initialised(data);
     
     const int buf_size = 100;  //TODO: handle possibility of words > 100 chars in length
