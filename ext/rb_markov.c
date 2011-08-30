@@ -107,7 +107,7 @@ static VALUE mk_generate_string(VALUE self) {
 }
 
 /* :nodoc: */
-void Init_markov_native() {
+void Init_markov() {
     VALUE mk_module = rb_define_module("Markov");
     
     VALUE mk_class = rb_define_class_under(mk_module, "ChainNative", rb_cObject);
