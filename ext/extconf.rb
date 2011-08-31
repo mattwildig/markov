@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'mkmf'
 
 $CFLAGS << " -Wall -std=c99 -Werror"
