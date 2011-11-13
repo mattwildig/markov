@@ -2,7 +2,7 @@
 
 require 'mkmf'
 
-$warnflags.gsub! /-Wdeclaration-after-statement/, ''
+$warnflags.gsub! /-Wdeclaration-after-statement/, '' if $warnflags
 $CFLAGS << " -Wall -std=c99 -Werror"
 
 have_header("ruby/io.h")
